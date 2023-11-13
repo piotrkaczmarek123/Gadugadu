@@ -10,6 +10,7 @@ function App() {
     const [users, setUsers] = useState([]);
     const [newUser, setNewUser] = useState({pk: null, username: "", password: ""});
     const [selectedUser, setSelectedUser] = useState({pk: null, username: "", password: ""});
+    const [loginData, setLoginData] = useState({pk: null, username: "", password: "" });
 
     const onUserChange = e => {
         const {name, value} = e.target;
@@ -26,6 +27,14 @@ function App() {
             [name]: value
         }));
     }
+
+    const onLoginChange = e => {
+        const { name, value } = e.target;
+        setLoginData(prevLoginData => ({
+            ...prevLoginData,
+            [name]: value,
+        }));
+    };
 
     const onUserSelect = e => {
         const name = e;
@@ -48,6 +57,18 @@ function App() {
             axios.post(API_URL + "create-user", newUser);
             setUsers([...users, newUser]);
             setNewUser({username: "", password: ""});
+        }
+    };
+
+    const loginUser = () => {
+        if (loginData.username.trim() !== '' && loginData.password.trim() !== '') {
+            axios.post(API_URL + "login-user", loginData)
+                .then(response => {
+                    console.log("Login succesfully:", response.data);
+                })
+                .catch(error => {
+                    console.error("Login failed:", error.response.data);
+                });
         }
     };
 
@@ -101,20 +122,21 @@ function App() {
             <div>
                 <input
                     type="text"
-                    placeholder="username"
+                    placeholder="login"
                     name="username"
-                    value={newUser.username}
-                    onChange={(e) => onUserChange(e)}
+                    value={loginData.username}
+                    onChange={(e) => onLoginChange(e)}
                 />
                 <input
                     type="password"
                     placeholder="password"
                     name="password"
-                    value={newUser.password}
-                    onChange={(e) => onUserChange(e)}
+                    value={loginData.password}
+                    onChange={(e) => onLoginChange(e)}
                 />
-                <button onClick={addUser}>Login</button>
+                <button onClick={loginUser}>Log in</button>
             </div>
+        
             <h2>Add note</h2>
             <div>
                 <input

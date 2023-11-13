@@ -41,17 +41,16 @@ class CreateUserView(generics.CreateAPIView):
 
 class LoginUserView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        print(request.data)
-        password = request.data["password"]
-        username = request.data["username"]
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response({'error': 'Missing username or password'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            account = User.objects.get(password = password, username = username)
+            account = User.objects.get(username=username, password=password)
         except User.DoesNotExist:
-            return Response({'error': 'User not found'})
-        if account:
-            return Response({'message': 'Logged successfully'}, status=status.HTTP_200_OK)
-        #serializer = self.serializer_class(data=request.data, context={'request': request})
-        #serializer.is_valid(raise_exception=True)
-        #user = serializer.validated_data['user']
-        #token, created = Token.objects.get_or_create(user=user)
-        #return Response({'token': token.key, 'user_id': user.pk, 'username': user.username})
+            return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+        # Tutaj możesz kontynuować operacje na obiekcie account, na przykład generować token JWT, zwracać odpowiedź z tokenem itp.
+        # W poniższym przykładzie zakładam, że korzystasz z tokenów Django REST Framework
+        token, created = Token.objects.get_or_create(user=account)
+        return Response({'message': 'Logged successfully', 'token': token.key}, status=status.HTTP_200_OK)

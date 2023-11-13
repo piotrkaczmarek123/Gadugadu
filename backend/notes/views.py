@@ -44,10 +44,12 @@ class LoginUserView(ObtainAuthToken):
         print(request.data)
         password = request.data["password"]
         username = request.data["username"]
-        account = User.objects.get(password=password, username=username)
+        try:
+            account = User.objects.get(password = password, username = username)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'})
         if account:
             return Response({'message': 'Logged successfully'}, status=status.HTTP_200_OK)
-        return Response({'error': 'Not found'})  
         #serializer = self.serializer_class(data=request.data, context={'request': request})
         #serializer.is_valid(raise_exception=True)
         #user = serializer.validated_data['user']
